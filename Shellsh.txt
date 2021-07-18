@@ -1,0 +1,32 @@
+-----------------------------------------------------------
+
+sudo apt-get update
+sudo apt-get -y install apache2
+sudo service apache2 start
+sudo rm /var/www/html/index.html
+sudo echo "<html>
+<head>
+  <title> Nilavembu Herbs </title>
+</head>
+<body>
+  <p> Main Branch Web Server
+</body>
+</html>" | sudo tee -a /var/www/html/index.html
+
+
+---------------------------------------------------------
+
+
+sudo apt-get update
+sudo apt-get -y install apache2
+sudo service apache2 start
+sudo rm /var/www/html/index.html
+sudo echo "<html>
+<head>
+  <title> Nilavembu Herbs </title>
+</head>
+<body>
+  <p> Main Branch Web Server
+</body>
+</html>" | sudo tee -a /var/www/html/index.html
+
