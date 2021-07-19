@@ -306,13 +306,68 @@ probe_id = azurerm_lb_probe.lbhp.id
 }
 
 
-resource "azurerm_storage_account" "example" {
+resource "azurerm_storage_account" "storage" {
   name                     = "nilavembustraccsea"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
   account_replication_type = "GRS"
 enable_https_traffic_only = true
+}
+
+resource "azurerm_recovery_services_vault" "rsv" {
+  name                = "seavmbackup"                                                                                                                                                                                location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "Standard"
+}
+
+resource "azurerm_backup_policy_vm" "bckpolicy" {
+  name                = "seaserver-policy"
+  resource_group_name = azurerm_resource_group.rg.name
+  recovery_vault_name = azurerm_recovery_services_vault.rsv.name
+
+  timezone = "UTC"
+
+  backup {
+    frequency = "Daily"
+    time      = "23:00"
+  }
+
+  retention_daily {
+    count = 10
+  }
+
+  retention_weekly {
+    count    = 26
+    weekdays = ["Sunday", "Wednesday", "Friday", "Saturday"]
+  }
+
+  retention_monthly {
+    count    = 12
+    weekdays = ["Sunday", "Wednesday"]
+    weeks    = ["First", "Last"]
+  }
+
+  retention_yearly {
+    count    = 4
+    weekdays = ["Sunday"]
+    weeks    = ["Last"]
+    months   = ["January"]
+  }
+}
+
+resource "azurerm_backup_protected_vm" "vm1" {
+  resource_group_name = azurerm_resource_group.rg.name
+  recovery_vault_name = azurerm_recovery_services_vault.rsv.name
+  source_vm_id        = azurerm_linux_virtual_machine.vm1.id
+  backup_policy_id    = azurerm_backup_policy_vm.bckpolicy.id
+}
+
+resource "azurerm_backup_protected_vm" "vm2" {
+  resource_group_name = azurerm_resource_group.rg.name
+  recovery_vault_name = azurerm_recovery_services_vault.rsv.name
+  source_vm_id        = azurerm_linux_virtual_machine.vm2.id
+  backup_policy_id    = azurerm_backup_policy_vm.bckpolicy.id
 }
                                                                                   
 
